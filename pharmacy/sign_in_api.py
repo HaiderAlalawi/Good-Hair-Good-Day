@@ -4,7 +4,7 @@ from pharmacy.schema import *
 
 sign_in_router = Router(tags=['SignIn'])
 
-@sign_in_router.post("/signin",response={
+@sign_in_router.post("",response={
     200: AuthOut,
     404: ErrorCode,
     401: ErrorCode,

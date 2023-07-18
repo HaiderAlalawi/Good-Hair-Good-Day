@@ -27,7 +27,7 @@ from pharmacy.sign_in_api import sign_in_router
 
 api=NinjaAPI()
 
-api.add_router('', sign_in_router)
+api.add_router('/signin', sign_in_router)
 api.add_router('sales_item/', sales_router)
 api.add_router('outcome/', ad_router)
 api.add_router('statistics/', statistics_router)
