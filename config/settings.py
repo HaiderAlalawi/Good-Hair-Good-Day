@@ -47,7 +47,7 @@ INSTALLED_APPS = [
 ]
 
 CORS_ALLOWED_ORIGINS = [
-    "https://good-hair-good-day.web.app",  # Replace this with the actual domain of your Flutter web app
+    "https://good-hair-good-day.web.app/",  # Replace this with the actual domain of your Flutter web app
 ]
 
 CORS_ALLOW_METHODS = [
