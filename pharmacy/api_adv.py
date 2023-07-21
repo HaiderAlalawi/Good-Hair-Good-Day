@@ -2,7 +2,7 @@ from typing import List
 from ninja import Router
 from pharmacy.authorization import AuthBearer
 from pharmacy.schema import AdvertisementView,AdvertisementAdd
-from pharmacy.models import Advertisment
+from pharmacy.models import Advertisment, AdvertismentName
 from datetime import datetime
 
 
