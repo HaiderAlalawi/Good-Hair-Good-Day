@@ -62,10 +62,12 @@ class AllAccount(Schema):
     id:str
     name:str
     phone:str
-    place: str
-    itemsnumber:int  
+    #place: str
+    #itemsnumber:int  
     total:int 
     finish:bool
+    date:str
+    totalOutcome:int
 
 
 

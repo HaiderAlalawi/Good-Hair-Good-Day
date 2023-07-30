@@ -15,17 +15,27 @@ sales_router = Router(tags=['Sales'])
 def get_accounts(request):
     accounts=SalesAccount.objects.all().order_by('-date')
     result=[]
+
     for account in accounts:
-        totalItemNumber=0;
+        #totalItemNumber=0;
         totalAccountPrice=0
-        for item in account.salesItems.all():
-            totalItemNumber+=item.numberOfItem
-            totalAccountPrice+=(item.numberOfItem*item.ItemPrice)
+        totalOutcome=0
+        if account.finish:
+            for item in account.salesItems.all():
+                #totalItemNumber+=item.numberOfItem
+                totalAccountPrice+=(item.numberOfItem*item.ItemPrice)     
+        if not account.finish:
+            for item in account.salesItems.all():
+                #totalItemNumber+=item.numberOfItem
+                totalAccountPrice+=(item.numberOfItem*item.ItemPrice)
+                totalOutcome+=(item.numberOfItem*item.unitPrice)
         if account.delivary:
-            totalAccountPrice+=account.delivaryPrice   
+            totalAccountPrice+=account.delivaryPrice      
         result.append({
             'id': str(account.id),'name': account.name,'phone': account.phoneNumber, 
-            'place': account.place.name,'itemsnumber':totalItemNumber,'total':int(totalAccountPrice),'finish':account.finish,
+            #'place': account.place.name,'itemsnumber':totalItemNumber,
+            'total':int(totalAccountPrice),'finish':account.finish,'date':datetime.strftime(account.date,'%Y/%m/%d %H:%M'),
+            'totalOutcome':int(totalOutcome),
         })
     return result
 
