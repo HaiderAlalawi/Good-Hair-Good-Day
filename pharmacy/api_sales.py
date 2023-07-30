@@ -30,7 +30,7 @@ def get_accounts(request):
                 #totalItemNumber+=item.numberOfItem
                 totalAccountPrice+=(item.numberOfItem*item.ItemPrice)
                 generalOutcome+=(item.numberOfItem*item.unitPrice)
-        generalIncome+=totalAccountPrice
+            generalIncome+=totalAccountPrice
         if account.delivary:
             totalAccountPrice+=account.delivaryPrice      
         result.append({
