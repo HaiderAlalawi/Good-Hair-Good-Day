@@ -11,15 +11,16 @@ sales_router = Router(tags=['Sales'])
 
 
 
-@sales_router.get("/get_accounts", response=List[AllAccount],auth=AuthBearer())
+@sales_router.get("/get_accounts", auth=AuthBearer())
 def get_accounts(request):
     accounts=SalesAccount.objects.all().order_by('-date')
     result=[]
-
+    generalOutcome=0
+    generalIncome=0
     for account in accounts:
         #totalItemNumber=0;
         totalAccountPrice=0
-        totalOutcome=0
+        
         if account.finish:
             for item in account.salesItems.all():
                 #totalItemNumber+=item.numberOfItem
@@ -28,16 +29,21 @@ def get_accounts(request):
             for item in account.salesItems.all():
                 #totalItemNumber+=item.numberOfItem
                 totalAccountPrice+=(item.numberOfItem*item.ItemPrice)
-                totalOutcome+=(item.numberOfItem*item.unitPrice)
+                generalOutcome+=(item.numberOfItem*item.unitPrice)
+        generalIncome+=totalAccountPrice
         if account.delivary:
             totalAccountPrice+=account.delivaryPrice      
         result.append({
             'id': str(account.id),'name': account.name,'phone': account.phoneNumber, 
             #'place': account.place.name,'itemsnumber':totalItemNumber,
             'total':int(totalAccountPrice),'finish':account.finish,'date':datetime.strftime(account.date,'%Y/%m/%d %H:%M'),
-            'totalOutcome':int(totalOutcome),
         })
-    return result
+    
+    return {
+        'income':generalIncome,
+        'outcome':generalOutcome, 
+        'accounts': result,
+        } 
 
 
 @sales_router.get("/get_account/{id}",response=AccountId,auth=AuthBearer())

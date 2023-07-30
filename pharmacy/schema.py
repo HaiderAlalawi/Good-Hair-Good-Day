@@ -67,7 +67,6 @@ class AllAccount(Schema):
     total:int 
     finish:bool
     date:str
-    totalOutcome:int
 
 
 
