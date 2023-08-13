@@ -19,22 +19,29 @@ from ninja import NinjaAPI
 from config import settings
 from django.conf.urls.static import static
 
-from pharmacy.api_sales import sales_router
-from pharmacy.api_statistic import statistics_router
-from pharmacy.api_adv import ad_router
-from pharmacy.sign_in_api import sign_in_router
+from pharmacy.apis.api_account import account_router
+from pharmacy.apis.api_statistic import statistics_router
+from pharmacy.apis.api_outcome import outcome_router
+from pharmacy.apis.sign_in_api import sign_in_router
+from pharmacy.apis.api_product import product_router
+from pharmacy.apis.api_sale_item import sale_item_router
+#from pharmacy.apis.test import test_router
+
 
 
 api=NinjaAPI()
 
-api.add_router('/signin', sign_in_router)
-api.add_router('sales_item/', sales_router)
-api.add_router('outcome/', ad_router)
+api.add_router('signin', sign_in_router)
+api.add_router('account/', account_router)
+api.add_router('sale_item/', sale_item_router)
+api.add_router('outcome/', outcome_router)
 api.add_router('statistics/', statistics_router)
+api.add_router('item/', product_router)
+#api.add_router('test/', test_router)
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('pharmacy/',api.urls)
+    path('good-hair-good-day/',api.urls)
 ]
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

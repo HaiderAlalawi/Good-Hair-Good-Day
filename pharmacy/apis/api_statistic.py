@@ -1,7 +1,6 @@
 from ninja import Router
 from pharmacy.authorization import AuthBearer
-from pharmacy.schema import *
-from pharmacy.models import *
+from pharmacy.models import Outcome,NewItemName,NewCompanyName,NewSourceName,Item,ShoppingBill
 from django.db.models import F, Sum
 from django.db.models.functions import ExtractMonth, ExtractYear
 
@@ -16,31 +15,32 @@ def get_money(request):
     insidesell=0
     outsidebuy=0
     outsidesell=0
-    advertisments=0
-    delivary=0
-    for account in Sales.objects.all():
-        if str(account.sourceName.placeName.type) == 'i':
-            insidebuy+=(account.unitPrice*account.numberOfItem)
-            insidesell+=(account.ItemPrice*account.numberOfItem)
-        if str(account.sourceName.placeName.type) == 'o':
-            outsidebuy+=(account.unitPrice*account.numberOfItem)
-            outsidesell+=(account.ItemPrice*account.numberOfItem)
-        if account.salesItem.delivary:
-            delivary+=account.salesItem.delivaryPrice  
-    for adv in Advertisment.objects.all():
-            advertisments+=adv.price 
+    allOutcome=0
+    allDelivary=0
+    for shoppingBill in ShoppingBill.objects.all():
+        for item in shoppingBill.item.all():
+            if str(item.sourceName.placeName.type) == 'i':
+                insidebuy+=(item.sourcePrice*item.numberOfItem)
+                insidesell+=(item.itemPrice*item.numberOfItem)
+            if str(item.sourceName.placeName.type) == 'o':
+                outsidebuy+=(item.sourcePrice*item.numberOfItem)
+                outsidesell+=(item.itemPrice*item.numberOfItem)
+        if shoppingBill.delivary:
+            allDelivary+=shoppingBill.deliveryPrice  
+    for outcome in Outcome.objects.all():
+            allOutcome+=outcome.price 
     return {'insidebuy':insidebuy, 'insidesell':insidesell,'outsidebuy':outsidebuy,
-            'outsidesell':outsidesell,'advertisments':advertisments,'delivary':delivary,'myMoney':((insidesell+outsidesell)-(insidebuy+outsidebuy)-advertisments)
+            'outsidesell':outsidesell,'advertisments':allOutcome,'delivary':allDelivary,'myMoney':((insidesell+outsidesell)-(insidebuy+outsidebuy)-allOutcome)
             }
 
 @statistics_router.get("/get_statistics",auth=AuthBearer())
 def get_statistics(request):
     result = {'items': {}, 'company': {}, 'source': {}, 'place': {}, 'date': {}, 'account':{}}
 
-    items = ItemName.objects.annotate(
-        total_items=Sum('itemName__numberOfItem'),
-        total_cost=Sum(F('itemName__numberOfItem') * F('itemName__unitPrice')),
-        total_sell=Sum(F('itemName__numberOfItem') * F('itemName__ItemPrice'))
+    items = NewItemName.objects.annotate(
+        total_items=Sum('item__numberOfItem'),
+        total_cost=Sum(F('item__numberOfItem') * F('item__sourcePrice')),
+        total_sell=Sum(F('item__numberOfItem') * F('item__itemPrice'))
     ).exclude(total_items=None).order_by('-total_items')
 
     for item in items:
@@ -57,10 +57,10 @@ def get_statistics(request):
                 'totalSell': item.total_sell
             }
 
-    companies = CompanyName.objects.annotate(
-        total_items=Sum('companyName__numberOfItem'),
-        total_cost=Sum(F('companyName__numberOfItem') * F('companyName__unitPrice')),
-        total_sell=Sum(F('companyName__numberOfItem') * F('companyName__ItemPrice'))
+    companies = NewCompanyName.objects.annotate(
+        total_items=Sum('company__numberOfItem'),
+        total_cost=Sum(F('company__numberOfItem') * F('company__sourcePrice')),
+        total_sell=Sum(F('company__numberOfItem') * F('company__itemPrice'))
     ).exclude(total_items=None).order_by('-total_items')
 
     for company in companies:
@@ -78,10 +78,10 @@ def get_statistics(request):
             }
         
 
-    sources = SourceName.objects.annotate(
-        total_items=Sum('sourceName__numberOfItem'),
-        total_cost=Sum(F('sourceName__numberOfItem') * F('sourceName__unitPrice')),
-        total_sell=Sum(F('sourceName__numberOfItem') * F('sourceName__ItemPrice'))
+    sources = NewSourceName.objects.annotate(
+        total_items=Sum('source__numberOfItem'),
+        total_cost=Sum(F('source__numberOfItem') * F('source__sourcePrice')),
+        total_sell=Sum(F('source__numberOfItem') * F('source__itemPrice'))
     ).exclude(total_items=None).order_by('-total_items')
 
     for source in sources:
@@ -99,46 +99,46 @@ def get_statistics(request):
         }
         
 
-    places = Sales.objects.values('salesItem__place__name').annotate(
+    places = Item.objects.values('items__location__governorate__name').annotate(
         total_items=Sum('numberOfItem'),
-        total_cost=Sum(F('numberOfItem') * F('unitPrice')),
-        total_sell=Sum(F('numberOfItem') * F('ItemPrice'))
+        total_cost=Sum(F('numberOfItem') * F('sourcePrice')),
+        total_sell=Sum(F('numberOfItem') * F('itemPrice'))
     ).exclude(total_items=None).order_by('-total_items')
 
     for place in places:
-        result['place'][place['salesItem__place__name']] = {
+        result['place'][place['items__location__governorate__name']] = {
             'totalItems': place['total_items'],
             'totalCost': place['total_cost'],
             'totalSell': place['total_sell']
         }
     
-    accounts = Sales.objects.values('salesItem__name').annotate(
+    accounts = Item.objects.values('items__customerInformation__name').annotate(
         total_items=Sum('numberOfItem'),
-        total_cost=Sum(F('numberOfItem') * F('unitPrice')),
-        total_sell=Sum(F('numberOfItem') * F('ItemPrice'))
+        total_cost=Sum(F('numberOfItem') * F('sourcePrice')),
+        total_sell=Sum(F('numberOfItem') * F('itemPrice'))
                 ).exclude(total_items=None).order_by('-total_items')
 
     # Add sales accounts to result
     for account in accounts:
-        if account['salesItem__name'] in result['account']:
+        if account['items__customerInformation__name'] in result['account']:
             # If the item already exists, add the values to the existing totals
-            result['account'][account['salesItem__name']]['totalItems'] += account.total_items
-            result['account'][account['salesItem__name']]['totalCost'] += account.total_cost
-            result['account'][account['salesItem__name']]['totalSell'] += account.total_sell
+            result['account'][account['items__customerInformation__name']]['totalItems'] += account.total_items
+            result['account'][account['items__customerInformation__name']]['totalCost'] += account.total_cost
+            result['account'][account['items__customerInformation__name']]['totalSell'] += account.total_sell
         else:
             # Otherwise, create a new entry for the item
-            result['account'][account['salesItem__name']] = {
+            result['account'][account['items__customerInformation__name']] = {
             'totalItems': account['total_items'],
             'totalCost': account['total_cost'],
             'totalSell': account['total_sell']
         } 
         
 
-    months = SalesAccount.objects.annotate(month=ExtractMonth('date'), year=ExtractYear('date')) \
+    months = ShoppingBill.objects.annotate(month=ExtractMonth('requestDate'), year=ExtractYear('requestDate')) \
         .values('month', 'year') \
-        .annotate(total_items=Sum('salesItems__numberOfItem'),
-                total_cost=Sum(F('salesItems__numberOfItem') * F('salesItems__unitPrice')),
-                total_sell=Sum(F('salesItems__numberOfItem') * F('salesItems__ItemPrice'))).exclude(total_items=None).order_by('-total_items')
+        .annotate(total_items=Sum('item__numberOfItem'),
+                total_cost=Sum(F('item__numberOfItem') * F('item__sourcePrice')),
+                total_sell=Sum(F('item__numberOfItem') * F('item__itemPrice'))).exclude(total_items=None).order_by('-total_items')
 
     for month in months:
         year = month['year']

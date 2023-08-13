@@ -25,3 +25,4 @@ if __name__ == '__main__':
 
 #python manage.py runserver 10000
 #python manage.py runserver 0.0.0.0:10000
+#python manage.py admin_generator pharmacy > pharmacy/admin.py

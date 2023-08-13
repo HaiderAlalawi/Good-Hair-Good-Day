@@ -1,6 +1,6 @@
 from ninja import Router
-from pharmacy.authorization import *
-from pharmacy.schema import *
+from pharmacy.authorization import User, create_token_for_user
+from pharmacy.schema import AuthOut, ErrorCode
 
 sign_in_router = Router(tags=['SignIn'])
 

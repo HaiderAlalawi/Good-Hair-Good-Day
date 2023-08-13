@@ -17,7 +17,7 @@ class Error(Schema):
     details:str
 
 
-class SalesItem(Schema):
+class ItemCreateSchema(Schema):
     itemName: str
     companyName: str
     sourceName: str
@@ -30,21 +30,23 @@ class SalesItem(Schema):
 
 
 
-class SalesItemId(SalesItem):
+class SalesItemId(ItemCreateSchema):
     id:str
 
 class Account(Schema):
     name:str
     phone:str
-    place: str
+    governorate:str
+    zone:str | None
+    nearby: str | None
     delivary:bool
     finish:bool
     delivaryPrice:int
     notes:str | None
     link:str | None
 
-class AccountAdd(Account):
-    salesItems:List[SalesItem]
+class AccountCreateSchema(Account):
+    salesItems:List[ItemCreateSchema]
 
 class AccountView(Account):
     itemsnumber:int  
@@ -69,20 +71,35 @@ class AllAccount(Schema):
     date:str
 
 
+class GetAccounts(Schema):
+    income:int
+    outcome:int
+    accounts:List[AllAccount]
 
 
 
 
-
-class AdvertisementView(Schema):
+class OutcomeView(Schema):
     id:str
     name:str
     price:int
     date:str
 
-class AdvertisementAdd(Schema):
+class OutcomeCreateSchema(Schema):
     name:str
     price:int
+    
+class ProductSchema(Schema):
+    name: str
+    company_name: str
+    details : str | None
+    buy_price: float
+    sale_price: float    
 
 
 
+class ProductResponseSchema(ProductSchema):
+    id: str
+    
+class ProductCreateSchema(ProductSchema):
+    pass    
