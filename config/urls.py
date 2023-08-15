@@ -25,19 +25,17 @@ from pharmacy.apis.api_outcome import outcome_router
 from pharmacy.apis.sign_in_api import sign_in_router
 from pharmacy.apis.api_product import product_router
 from pharmacy.apis.api_sale_item import sale_item_router
-#from pharmacy.apis.test import test_router
 
 
 
 api=NinjaAPI()
 
 api.add_router('signin', sign_in_router)
-api.add_router('account/', account_router)
+api.add_router('shopping_bill/', account_router)
 api.add_router('sale_item/', sale_item_router)
 api.add_router('outcome/', outcome_router)
 api.add_router('statistics/', statistics_router)
 api.add_router('item/', product_router)
-#api.add_router('test/', test_router)
 
 urlpatterns = [
     path('admin/', admin.site.urls),

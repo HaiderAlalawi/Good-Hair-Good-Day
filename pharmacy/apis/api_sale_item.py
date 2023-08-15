@@ -5,7 +5,7 @@ from pharmacy.models import NewCompanyName, NewItemName, NewPlaceName,NewSourceN
 
 sale_item_router = Router(tags=['SaleItem'])
 
-@sale_item_router.post("/{id}",auth=AuthBearer())
+@sale_item_router.post("/add/{id}",auth=AuthBearer())
 def create_item(request,id:str,item:ItemCreateSchema):
     try:
         shoppingBill=ShoppingBill.objects.get(billNumber=id)
@@ -30,7 +30,7 @@ def create_item(request,id:str,item:ItemCreateSchema):
         return ImportError
 
 
-@sale_item_router.put("/{id}",auth=AuthBearer())
+@sale_item_router.put("/update/{id}",auth=AuthBearer())
 def update_item(request, edit_item:ItemCreateSchema,id:str):
     _itemname, created=NewItemName.objects.get_or_create(name=edit_item.itemName)
     _companyname, created=NewCompanyName.objects.get_or_create(name=edit_item.companyName)
@@ -50,8 +50,9 @@ def update_item(request, edit_item:ItemCreateSchema,id:str):
     return {200:'Sucsess edit account'} 
 
 
-@sale_item_router.delete("/{id}",auth=AuthBearer())
-def delete_item(request,id:str):
-    item_instance=Item.objects.get(id=id)
-    item_instance.delete()
+@sale_item_router.delete("/delete/{billNumber}/{itemId}",auth=AuthBearer())
+def delete_item(request,billNumber:str,itemId:str):
+    item_instance=Item.objects.get(id=itemId)
+    shoppingBill=ShoppingBill.objects.get(billNumber=billNumber)
+    shoppingBill.item.remove(item_instance)
     return {200:'Sucsess delete item'}  

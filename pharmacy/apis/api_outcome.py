@@ -8,7 +8,7 @@ from datetime import datetime
 
 outcome_router = Router(tags=['Outcome'])
 
-@outcome_router.post("/",auth=AuthBearer())
+@outcome_router.post("/add",auth=AuthBearer())
 def create_outcome(request,outcome:OutcomeCreateSchema):
     try:
         try:
@@ -26,7 +26,7 @@ def create_outcome(request,outcome:OutcomeCreateSchema):
         return ImportError
     
 
-@outcome_router.get("/", response=List[OutcomeView],auth=AuthBearer())
+@outcome_router.get("/get_all", response=List[OutcomeView],auth=AuthBearer())
 def outcome_items(request):
     result=[]
     for outcome in Outcome.objects.all():
@@ -35,7 +35,7 @@ def outcome_items(request):
         })
     return result
 
-@outcome_router.get("/{id}", response=OutcomeView,auth=AuthBearer())
+@outcome_router.get("/get_one/{id}", response=OutcomeView,auth=AuthBearer())
 def get_outcome(request,id:str):
     outcome=Outcome.objects.get(id=id)
     return {
@@ -44,7 +44,7 @@ def get_outcome(request,id:str):
 
 
     
-@outcome_router.put("/{id}",auth=AuthBearer())
+@outcome_router.put("/update/{id}",auth=AuthBearer())
 def update_outcome(request, outcome:OutcomeCreateSchema,id:str):
     try:
         try:
@@ -65,7 +65,7 @@ def update_outcome(request, outcome:OutcomeCreateSchema,id:str):
 
 
 
-@outcome_router.delete("/{id}",auth=AuthBearer())
+@outcome_router.delete("/delete/{id}",auth=AuthBearer())
 def delete_outcome(request,id:str):
     outcome_instance=Outcome.objects.get(id=id)
     outcome_instance.delete()

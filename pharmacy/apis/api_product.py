@@ -6,7 +6,7 @@ from pharmacy.schema import ProductSchema, ProductResponseSchema, ProductCreateS
 
 product_router = Router(tags=['Products'])
 
-@product_router.post("/",auth=AuthBearer())
+@product_router.post("/add",auth=AuthBearer())
 def create_product(request, product: ProductCreateSchema):
     try:
         company = NewCompanyName.objects.get(name=product.company_name)
@@ -15,7 +15,7 @@ def create_product(request, product: ProductCreateSchema):
     Product.objects.create(name=product.name, company=company,details =product.details,buy_price=product.buy_price, sale_price=product.sale_price)
     return {200:'Success add new item'} 
 
-@product_router.get("/", response=list[ProductResponseSchema],auth=AuthBearer())
+@product_router.get("/get_all", response=list[ProductResponseSchema],auth=AuthBearer())
 def product_items(request):
     result=[]
     products=Product.objects.all()
@@ -34,7 +34,7 @@ def product_items(request):
     return result
 
 
-@product_router.get("/{product_id}", response=ProductSchema,auth=AuthBearer())
+@product_router.get("/get_one/{product_id}", response=ProductSchema,auth=AuthBearer())
 def get_product(request, product_id: str):
     product = Product.objects.get(id=product_id)
     return {
@@ -45,7 +45,7 @@ def get_product(request, product_id: str):
                 'sale_price' : product.sale_price
             }
 
-@product_router.put("/{product_id}",auth=AuthBearer())
+@product_router.put("/update/{product_id}",auth=AuthBearer())
 def update_product(request, product_id: str, product: ProductSchema):
     try:
         company = NewCompanyName.objects.get(name=product.company_name)
@@ -60,7 +60,7 @@ def update_product(request, product_id: str, product: ProductSchema):
     product_instance.save()
     return {200:'Success edit item'} 
 
-@product_router.delete("/{product_id}", response=dict,auth=AuthBearer())
+@product_router.delete("/delete/{product_id}", response=dict,auth=AuthBearer())
 def delete_product(request, product_id: str):
     product_instance = Product.objects.get(id=product_id)
     product_instance.delete()

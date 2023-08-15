@@ -6,7 +6,7 @@ from datetime import datetime
 
 account_router = Router(tags=['Account'])
 
-@account_router.post("/",auth=AuthBearer())
+@account_router.post("/add",auth=AuthBearer())
 def create_account(request, account_data:AccountCreateSchema):
     try:
         _customerinformation, created = CustomerInformation.objects.get_or_create(
@@ -68,7 +68,7 @@ def create_account(request, account_data:AccountCreateSchema):
         return ImportError
 
 
-@account_router.get("/",response=GetAccounts, auth=AuthBearer())
+@account_router.get("/get_all",response=GetAccounts, auth=AuthBearer())
 def account_items(request):
     shoppingBills=ShoppingBill.objects.all().order_by('-requestDate')
     result=[]
@@ -103,7 +103,7 @@ def account_items(request):
         } 
 
 
-@account_router.get("/{id}",response=AccountId,auth=AuthBearer())
+@account_router.get("/get_one/{id}",response=AccountId,auth=AuthBearer())
 def get_account(request,id:str):
     shoppingBill=ShoppingBill.objects.get(billNumber=id)
     totalItemNumber=0
@@ -140,7 +140,7 @@ def get_account(request,id:str):
             'link':shoppingBill.accountLink
         }
 
-@account_router.put("/{id}",auth=AuthBearer())
+@account_router.put("/update/{id}",auth=AuthBearer())
 def update_account(request, edit_account:Account,id:str):
     _customerinformation, created = CustomerInformation.objects.get_or_create(
                 name=edit_account.name)
@@ -164,7 +164,7 @@ def update_account(request, edit_account:Account,id:str):
     shoppingBill.save()
     return {200:'Sucsess edit account'} 
 
-@account_router.delete("/{id}",auth=AuthBearer())
+@account_router.delete("/delete/{id}",auth=AuthBearer())
 def delete_Account(request,id:str):
     shoppingBill=ShoppingBill.objects.get(billNumber=id)
     shoppingBill.delete()
