@@ -30,24 +30,29 @@ def create_item(request,id:str,item:ItemCreateSchema):
         return ImportError
 
 
-@sale_item_router.put("/update/{id}",auth=AuthBearer())
-def update_item(request, edit_item:ItemCreateSchema,id:str):
+@sale_item_router.put("/update/{billNumber}/{itemId}",auth=AuthBearer())
+def update_item(request, edit_item:ItemCreateSchema,billNumber:str,itemId:str):
+    old_item_instance=Item.objects.get(id=itemId)
+    shoppingBill=ShoppingBill.objects.get(billNumber=billNumber)
+    shoppingBill.item.remove(old_item_instance)
     _itemname, created=NewItemName.objects.get_or_create(name=edit_item.itemName)
     _companyname, created=NewCompanyName.objects.get_or_create(name=edit_item.companyName)
     _placeName, created=NewPlaceName.objects.get_or_create(name=edit_item.sourcePlaceName,
                                                 type=edit_item.sourcePlaceType)
     _sourcename, created=NewSourceName.objects.get_or_create(name=edit_item.sourceName,placeName=_placeName)
     
-    item_instance=Item.objects.get(id=id)
-    item_instance.itemName=_itemname
-    item_instance.companyName=_companyname
-    item_instance.sourceName=_sourcename
-    item_instance.sourcePrice=edit_item.unitPrice
-    item_instance.numberOfItem=edit_item.numberOfItem
-    item_instance.itemPrice=edit_item.ItemPrice
-    item_instance.size=edit_item.notes
-    item_instance.save()   
-    return {200:'Sucsess edit account'} 
+    item_instance, created=Item.objects.get_or_create(
+                                            itemName=_itemname,  
+                                            companyName=_companyname,
+                                            sourceName=_sourcename,
+                                            sourcePrice=edit_item.unitPrice,
+                                            numberOfItem=edit_item.numberOfItem,
+                                            itemPrice=edit_item.ItemPrice,
+                                            size=edit_item.notes
+                                        )
+    shoppingBill.item.add(item_instance)
+    shoppingBill.save()
+    return {200:'Sucsess edit item'} 
 
 
 @sale_item_router.delete("/delete/{billNumber}/{itemId}",auth=AuthBearer())
@@ -55,4 +60,5 @@ def delete_item(request,billNumber:str,itemId:str):
     item_instance=Item.objects.get(id=itemId)
     shoppingBill=ShoppingBill.objects.get(billNumber=billNumber)
     shoppingBill.item.remove(item_instance)
+    shoppingBill.save()
     return {200:'Sucsess delete item'}  
